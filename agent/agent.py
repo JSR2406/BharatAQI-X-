@@ -57,7 +57,44 @@ Provide a structured analysis with these sections:
 """)
 
 
+try:
+    from langchain_openai import ChatOpenAI
+    OPENROUTER_AVAILABLE = True
+except ImportError:
+    try:
+        from langchain_community.chat_models import ChatOpenAI
+        OPENROUTER_AVAILABLE = True
+    except ImportError:
+        OPENROUTER_AVAILABLE = False
+
+
+def _get_openrouter_key():
+    key = os.getenv("OPENROUTER_API_KEY")
+    if key:
+        return key
+    try:
+        import streamlit as st
+        if hasattr(st, "secrets") and "OPENROUTER_API_KEY" in st.secrets:
+            return st.secrets["OPENROUTER_API_KEY"]
+    except Exception:
+        pass
+    return None
+
+
 def _get_llm(model_name: str = "qwen3"):
+    openrouter_key = _get_openrouter_key()
+    if OPENROUTER_AVAILABLE and openrouter_key:
+        try:
+            logger.info("Using OpenRouter API with qwen/qwen-2.5-72b-instruct")
+            return ChatOpenAI(
+                model_name="qwen/qwen-2.5-72b-instruct",
+                openai_api_key=openrouter_key,
+                openai_api_base="https://openrouter.ai/api/v1",
+                temperature=0.3
+            )
+        except Exception as e:
+            logger.warning(f"OpenRouter init failed: {e}")
+
     if OLLAMA_AVAILABLE:
         try:
             llm = ChatOllama(model=model_name, temperature=0.3)
@@ -71,7 +108,7 @@ def _get_llm(model_name: str = "qwen3"):
             temperature=0.3,
             google_api_key=os.getenv("GOOGLE_API_KEY"),
         )
-    raise RuntimeError("No LLM available. Set GOOGLE_API_KEY or install Ollama.")
+    raise RuntimeError("No LLM available. Set OPENROUTER_API_KEY, GOOGLE_API_KEY or install Ollama.")
 
 
 def _mock_analysis(data: dict) -> str:

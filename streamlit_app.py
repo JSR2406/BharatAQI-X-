@@ -315,10 +315,22 @@ elif page == "🤖 AI Analyst":
         </div>""", unsafe_allow_html=True)
 
         if analyze:
-            with st.spinner("Qwen3 analyzing environmental data…"):
-                import time; time.sleep(1.2)
-            st.success("Analysis Complete")
-            st.markdown(f"""
+            with st.spinner("AI Analyst generating insights via OpenRouter / LLM..."):
+                try:
+                    from agent import analyze_location
+                    res_analysis = analyze_location(
+                        city=city, aqi=aqi_v, pm25=pm25_v, pm10=pm25_v*1.8,
+                        no2=no2_v, so2=15, co=1.5, o3=40, hcho=float(row["hcho"]),
+                        temperature=temp_v, humidity=hum_v, wind_speed=wind_v,
+                        fire_count=fire_v, date=pd.Timestamp.today().strftime("%Y-%m-%d"),
+                        use_mock=False
+                    )
+                    st.success("Analysis Complete")
+                    st.markdown(res_analysis)
+                except Exception as e:
+                    st.error(f"Agent execution failed: {e}")
+                    st.warning("Falling back to standard environmental rules...")
+                    st.markdown(f"""
 **🔍 Root Cause Analysis**
 AQI {aqi_v} ({cat}) in {city} is driven by:
 - Vehicular emissions: ~45% of PM2.5 load
@@ -334,15 +346,6 @@ Expected range: {max(0,aqi_v-30):.0f}–{aqi_v+25:.0f}
 - General: {"Avoid outdoor activity" if aqi_v>150 else "Normal with monitoring"}
 - Children/elderly: Stay indoors; HEPA purifier recommended
 - Asthma/COPD: Carry rescue inhaler at all times
-
-**🏛️ Government Advice (GRAP Stage {"III" if aqi_v>300 else "II" if aqi_v>200 else "I"})**
-- {"Halt construction >500m²; odd-even vehicles" if aqi_v>200 else "Issue air quality advisory"}
-- Issue alert via Sameer App and SAFAR network
-
-**👤 Citizen Advice**
-- {"Wear N95/KN95 mask" if aqi_v>200 else "Surgical mask sufficient"}
-- HEPA air purifier indoors; windows closed
-- Avoid outdoor exercise 6–10 AM
 """)
         else:
             st.info("Configure parameters on the left and click **Analyze with AI**")
