@@ -1,5 +1,6 @@
-# BharatAQI-X 🛰️
-### Explainable Satellite-to-Surface Air Quality Digital Twin for India
+# BharatAQI-X
+
+A hackathon prototype that explores links between satellite formaldehyde (HCHO) observations and modeled surface air quality in India. The dashboard presents prediction, forecast, hotspot, and explanation views. The local demo generates sample data. Treat the resulting maps and forecasts as exploratory outputs.
 **Bharatiya Antariksh Hackathon 2026 | Problem Statement: HCHO & Surface AQI**
 
 ---
@@ -40,7 +41,7 @@ BharatAQI-X/
 
 ### 1. Backend (FastAPI)
 ```bash
-cd BharatAQI-X/backend
+cd backend
 pip install -r requirements.txt
 
 # Generate data + train models
@@ -59,7 +60,7 @@ uvicorn app:app --reload --port 8000
 
 ### 2. Frontend (React)
 ```bash
-cd BharatAQI-X/frontend
+cd frontend
 npm install
 npm run dev
 # → http://localhost:3000
@@ -67,7 +68,7 @@ npm run dev
 
 ### 3. Docker (Full Stack)
 ```bash
-cd BharatAQI-X/docker
+cd docker
 docker-compose up --build
 # Backend  → http://localhost:8000
 # Frontend → http://localhost:3000
